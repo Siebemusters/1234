@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CRM — Sunkissed Dune</title>
+<style>
+  :root {
+    /* Sunkissed Dune palette — warm zand bij gouden uur */
+    --bg:        #F4EBDD;
+    --card:      #FBF6EF;
+    --dune:      #E4D3B8;
+    --dune-mid:  #CBB088;
+    --dune-deep: #B8925A;
+    --line:      #E7DBC8;
+    --ink:       #2A2521;
+    --muted:     #8A7E6E;
+    --won:       #8C7A3E;
+    --lost:      #A89C8A;
+    --black:     #1A1712;
+    --danger:    #9A4A3C;
+    --radius:    14px;
+    --shadow:    0 1px 2px rgba(42,37,33,.05), 0 6px 20px rgba(42,37,33,.04);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  header.top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 32px; }
+  header.top h1 { font-size: 26px; font-weight: 650; letter-spacing: -.02em; margin: 0; }
+  header.top p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+  .top-actions { display: flex; gap: 8px; }
+
+  /* Buttons */
+  button { font-family: inherit; font-size: 14px; cursor: pointer; border: none; border-radius: 10px; transition: opacity .15s, transform .05s; }
+  button:active { transform: translateY(1px); }
+  .btn-primary { background: var(--black); color: var(--bg); padding: 10px 18px; font-weight: 550; }
+  .btn-primary:hover { opacity: .88; }
+  .btn-ghost { background: transparent; color: var(--ink); padding: 9px 14px; border: 1px solid var(--line); }
+  .btn-ghost:hover { background: var(--dune); }
+  .btn-icon { background: transparent; color: var(--muted); padding: 4px 8px; font-size: 13px; }
+  .btn-icon:hover { color: var(--danger); }
+
+  /* Metric cards */
+  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 14px; }
+  .metric { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+  .metric .label { font-size: 12.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  .metric .value { font-size: 28px; font-weight: 650; letter-spacing: -.02em; margin-top: 6px; }
+  .metric .sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
+  section.panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); margin-top: 22px; }
+  section.panel h2 { font-size: 16px; font-weight: 620; margin: 0 0 16px; letter-spacing: -.01em; }
+
+  /* Status breakdown */
+  .status-row { display: grid; grid-template-columns: 130px 1fr 130px; align-items: center; gap: 14px; padding: 9px 0; }
+  .status-row + .status-row { border-top: 1px solid var(--line); }
+  .status-name { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .bar-track { background: var(--dune); border-radius: 6px; height: 10px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 6px; transition: width .3s ease; }
+  .status-meta { text-align: right; font-size: 13.5px; color: var(--muted); }
+  .status-meta strong { color: var(--ink); font-weight: 600; }
+
+  /* Forms */
+  form.entry { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 18px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .field.grow { flex: 1; min-width: 140px; }
+  input, select { font-family: inherit; font-size: 14px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); min-width: 0; }
+  input:focus, select:focus { outline: none; border-color: var(--dune-deep); }
+  .err { color: var(--danger); font-size: 12.5px; margin: -8px 0 12px; min-height: 0; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; padding: 0 10px 10px; }
+  td { padding: 12px 10px; border-top: 1px solid var(--line); vertical-align: middle; }
+  td.num, th.num { text-align: right; }
+  .pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 550; }
+  .empty { text-align: center; color: var(--muted); padding: 28px 10px; font-size: 14px; }
+  select.status-select { padding: 5px 8px; font-size: 13px; }
+
+  @media (max-width: 720px) {
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .status-row { grid-template-columns: 100px 1fr; }
+    .status-meta { grid-column: 1 / -1; text-align: left; }
+    .hide-sm { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>CRM</h1>
+      <p>Handmatig klanten &amp; deals bijhouden — omzet, conversie en pipeline in één blik.</p>
+    </div>
+    <div class="top-actions">
+      <button class="btn-ghost" id="exportBtn">Exporteren</button>
+      <button class="btn-ghost" id="importBtn">Importeren</button>
+      <input type="file" id="importFile" accept="application/json" hidden />
+    </div>
+  </header>
+
+  <!-- METRICS -->
+  <div class="metrics">
+    <div class="metric"><div class="label">Totale omzet</div><div class="value" id="m-revenue">—</div><div class="sub">gewonnen deals</div></div>
+    <div class="metric"><div class="label">Conversie</div><div class="value" id="m-conversion">—</div><div class="sub">gewonnen ÷ totaal deals</div></div>
+    <div class="metric"><div class="label">€ per klant</div><div class="value" id="m-percustomer">—</div><div class="sub">omzet ÷ aantal klanten</div></div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="label">Open deals</div><div class="value" id="m-opencount">—</div><div class="sub" id="m-openvalue">—</div></div>
+    <div class="metric"><div class="label">Gesloten deals</div><div class="value" id="m-closedcount">—</div><div class="sub">gewonnen + verloren</div></div>
+    <div class="metric"><div class="label">Aantal klanten</div><div class="value" id="m-customers">—</div><div class="sub" id="m-dealcount">—</div></div>
+  </div>
+
+  <!-- STATUS BREAKDOWN -->
+  <section class="panel">
+    <h2>Waarde per status</h2>
+    <div id="statusBreakdown"></div>
+  </section>
+
+  <!-- DEALS -->
+  <section class="panel">
+    <h2>Deals</h2>
+    <form class="entry" id="dealForm">
+      <div class="field grow">
+        <label for="dealCustomer">Klant</label>
+        <select id="dealCustomer"></select>
+      </div>
+      <div class="field grow">
+        <label for="dealTitle">Titel / omschrijving</label>
+        <input id="dealTitle" type="text" placeholder="bv. Website redesign" />
+      </div>
+      <div class="field">
+        <label for="dealValue">Waarde (€)</label>
+        <input id="dealValue" type="number" min="0" step="0.01" placeholder="0" />
+      </div>
+      <div class="field">
+        <label for="dealStatus">Status</label>
+        <select id="dealStatus"></select>
+      </div>
+      <button class="btn-primary" type="submit">Deal toevoegen</button>
+    </form>
+    <div class="err" id="dealErr"></div>
+    <div id="dealList"></div>
+  </section>
+
+  <!-- CUSTOMERS -->
+  <section class="panel">
+    <h2>Klanten</h2>
+    <form class="entry" id="customerForm">
+      <div class="field grow">
+        <label for="custName">Naam *</label>
+        <input id="custName" type="text" placeholder="bv. Jan Jansen" />
+      </div>
+      <div class="field grow">
+        <label for="custCompany">Bedrijf</label>
+        <input id="custCompany" type="text" placeholder="bv. Jansen BV" />
+      </div>
+      <div class="field grow">
+        <label for="custEmail">E-mail</label>
+        <input id="custEmail" type="email" placeholder="bv. jan@jansen.nl" />
+      </div>
+      <button class="btn-primary" type="submit">Klant toevoegen</button>
+    </form>
+    <div class="err" id="custErr"></div>
+    <div id="customerList"></div>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---- Config ----
+  var STATUSES = ["Nieuw", "In gesprek", "Voorstel", "Gewonnen", "Verloren"];
+  var OPEN_STATUSES = ["Nieuw", "In gesprek", "Voorstel"];
+  var STATUS_COLORS = {
+    "Nieuw":      "#E4D3B8",
+    "In gesprek": "#CBB088",
+    "Voorstel":   "#B8925A",
+    "Gewonnen":   "#8C7A3E",
+    "Verloren":   "#A89C8A"
+  };
+  var STORAGE_KEY = "crm-sunkissed-dune-v1";
+
+  var eur = new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+  var eur2 = new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR" });
+
+  // ---- State ----
+  var state = { customers: [], deals: [] };
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.customers) && Array.isArray(parsed.deals)) {
+          state = parsed;
+        }
+      }
+    } catch (e) {
+      console.warn("Kon opgeslagen data niet lezen:", e);
+    }
+  }
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      console.error("Opslaan mislukt:", e);
+    }
+  }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+  // ---- Pure berekening (het risicovolste stuk — apart getest) ----
+  function computeMetrics(customers, deals) {
+    var revenue = 0, openValue = 0, wonCount = 0, openCount = 0, closedCount = 0;
+    var perStatus = {};
+    STATUSES.forEach(function (s) { perStatus[s] = { count: 0, value: 0 }; });
+
+    deals.forEach(function (d) {
+      var v = Number(d.value) || 0;
+      var s = d.status;
+      if (perStatus[s]) { perStatus[s].count += 1; perStatus[s].value += v; }
+      if (s === "Gewonnen") { revenue += v; wonCount += 1; }
+      if (OPEN_STATUSES.indexOf(s) !== -1) { openValue += v; openCount += 1; }
+      else { closedCount += 1; }
+    });
+
+    var totalDeals = deals.length;
+    var conversion = totalDeals > 0 ? (wonCount / totalDeals) * 100 : 0;
+    var euroPerCustomer = customers.length > 0 ? revenue / customers.length : 0;
+
+    return {
+      revenue: revenue,
+      conversion: conversion,
+      euroPerCustomer: euroPerCustomer,
+      openCount: openCount,
+      openValue: openValue,
+      closedCount: closedCount,
+      wonCount: wonCount,
+      totalDeals: totalDeals,
+      customerCount: customers.length,
+      perStatus: perStatus
+    };
+  }
+  // Expose voor de smoke-test
+  window.CRM = { computeMetrics: computeMetrics, STATUSES: STATUSES, OPEN_STATUSES: OPEN_STATUSES };
+
+  // ---- Helpers ----
+  function el(id) { return document.getElementById(id); }
+  function esc(str) {
+    return String(str == null ? "" : str).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function customerById(id) {
+    for (var i = 0; i < state.customers.length; i++) if (state.customers[i].id === id) return state.customers[i];
+    return null;
+  }
+
+  // ---- Render ----
+  function render() {
+    var m = computeMetrics(state.customers, state.deals);
+
+    el("m-revenue").textContent = eur.format(m.revenue);
+    el("m-conversion").textContent = m.conversion.toFixed(0) + "%";
+    el("m-percustomer").textContent = eur.format(m.euroPerCustomer);
+    el("m-opencount").textContent = m.openCount;
+    el("m-openvalue").textContent = eur.format(m.openValue) + " open";
+    el("m-closedcount").textContent = m.closedCount;
+    el("m-customers").textContent = m.customerCount;
+    el("m-dealcount").textContent = m.totalDeals + (m.totalDeals === 1 ? " deal" : " deals");
+
+    renderStatusBreakdown(m);
+    renderCustomerOptions();
+    renderDeals();
+    renderCustomers();
+  }
+
+  function renderStatusBreakdown(m) {
+    var maxVal = 0;
+    STATUSES.forEach(function (s) { if (m.perStatus[s].value > maxVal) maxVal = m.perStatus[s].value; });
+
+    var html = STATUSES.map(function (s) {
+      var cell = m.perStatus[s];
+      var pct = maxVal > 0 ? (cell.value / maxVal) * 100 : 0;
+      return '' +
+        '<div class="status-row">' +
+          '<div class="status-name"><span class="dot" style="background:' + STATUS_COLORS[s] + '"></span>' + esc(s) + '</div>' +
+          '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%;background:' + STATUS_COLORS[s] + '"></div></div>' +
+          '<div class="status-meta"><strong>' + eur.format(cell.value) + '</strong> · ' + cell.count + 'x</div>' +
+        '</div>';
+    }).join("");
+    el("statusBreakdown").innerHTML = html;
+  }
+
+  function renderCustomerOptions() {
+    var sel = el("dealCustomer");
+    var prev = sel.value;
+    if (state.customers.length === 0) {
+      sel.innerHTML = '<option value="">— voeg eerst een klant toe —</option>';
+      sel.disabled = true;
+      return;
+    }
+    sel.disabled = false;
+    sel.innerHTML = state.customers.map(function (c) {
+      var label = c.company ? esc(c.name) + " (" + esc(c.company) + ")" : esc(c.name);
+      return '<option value="' + c.id + '">' + label + '</option>';
+    }).join("");
+    if (prev && customerById(prev)) sel.value = prev;
+  }
+
+  function renderDeals() {
+    var box = el("dealList");
+    if (state.deals.length === 0) {
+      box.innerHTML = '<div class="empty">Nog geen deals. Voeg er hierboven één toe.</div>';
+      return;
+    }
+    var rows = state.deals.map(function (d) {
+      var c = customerById(d.customerId);
+      var cname = c ? (c.company ? esc(c.name) + " · " + esc(c.company) : esc(c.name)) : "<em>onbekend</em>";
+      var opts = STATUSES.map(function (s) {
+        return '<option value="' + s + '"' + (s === d.status ? " selected" : "") + '>' + s + '</option>';
+      }).join("");
+      return '' +
+        '<tr>' +
+          '<td>' + cname + '</td>' +
+          '<td class="hide-sm">' + esc(d.title || "—") + '</td>' +
+          '<td class="num">' + eur2.format(Number(d.value) || 0) + '</td>' +
+          '<td><select class="status-select" data-deal="' + d.id + '">' + opts + '</select></td>' +
+          '<td class="num"><button class="btn-icon" data-del-deal="' + d.id + '">verwijder</button></td>' +
+        '</tr>';
+    }).join("");
+    box.innerHTML =
+      '<table><thead><tr>' +
+        '<th>Klant</th><th class="hide-sm">Titel</th><th class="num">Waarde</th><th>Status</th><th></th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table>';
+  }
+
+  function renderCustomers() {
+    var box = el("customerList");
+    if (state.customers.length === 0) {
+      box.innerHTML = '<div class="empty">Nog geen klanten. Voeg er hierboven één toe.</div>';
+      return;
+    }
+    var rows = state.customers.map(function (c) {
+      var deals = state.deals.filter(function (d) { return d.customerId === c.id; });
+      var total = deals.reduce(function (sum, d) { return sum + (Number(d.value) || 0); }, 0);
+      var won = deals.filter(function (d) { return d.status === "Gewonnen"; })
+                     .reduce(function (sum, d) { return sum + (Number(d.value) || 0); }, 0);
+      return '' +
+        '<tr>' +
+          '<td>' + esc(c.name) + '</td>' +
+          '<td class="hide-sm">' + esc(c.company || "—") + '</td>' +
+          '<td class="hide-sm">' + esc(c.email || "—") + '</td>' +
+          '<td class="num">' + deals.length + '</td>' +
+          '<td class="num">' + eur.format(total) + '</td>' +
+          '<td class="num"><strong>' + eur.format(won) + '</strong></td>' +
+          '<td class="num"><button class="btn-icon" data-del-cust="' + c.id + '">verwijder</button></td>' +
+        '</tr>';
+    }).join("");
+    box.innerHTML =
+      '<table><thead><tr>' +
+        '<th>Naam</th><th class="hide-sm">Bedrijf</th><th class="hide-sm">E-mail</th>' +
+        '<th class="num">Deals</th><th class="num">Totaal</th><th class="num">Gewonnen</th><th></th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table>';
+  }
+
+  // ---- Events ----
+  function initStatusSelects() {
+    var ds = el("dealStatus");
+    ds.innerHTML = STATUSES.map(function (s) { return '<option value="' + s + '">' + s + '</option>'; }).join("");
+  }
+
+  el("customerForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = el("custName").value.trim();
+    var errBox = el("custErr");
+    if (!name) { errBox.textContent = "Naam is verplicht."; return; }
+    errBox.textContent = "";
+    state.customers.push({
+      id: uid(),
+      name: name,
+      company: el("custCompany").value.trim(),
+      email: el("custEmail").value.trim()
+    });
+    save(); render();
+    this.reset();
+    el("custName").focus();
+  });
+
+  el("dealForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var errBox = el("dealErr");
+    var customerId = el("dealCustomer").value;
+    var valueRaw = el("dealValue").value;
+    var value = parseFloat(valueRaw);
+
+    if (!customerId) { errBox.textContent = "Kies een klant (of voeg er eerst één toe)."; return; }
+    if (valueRaw === "" || isNaN(value) || value < 0) { errBox.textContent = "Vul een geldige waarde in (0 of hoger)."; return; }
+    errBox.textContent = "";
+
+    state.deals.push({
+      id: uid(),
+      customerId: customerId,
+      title: el("dealTitle").value.trim(),
+      value: value,
+      status: el("dealStatus").value
+    });
+    save(); render();
+    el("dealTitle").value = "";
+    el("dealValue").value = "";
+    el("dealTitle").focus();
+  });
+
+  // Event-delegatie voor status-wijziging en verwijderen
+  document.addEventListener("change", function (e) {
+    var sel = e.target.closest ? e.target.closest(".status-select") : null;
+    if (sel && sel.dataset.deal) {
+      var d = state.deals.filter(function (x) { return x.id === sel.dataset.deal; })[0];
+      if (d) { d.status = sel.value; save(); render(); }
+    }
+  });
+
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    if (t.dataset && t.dataset.delDeal) {
+      if (confirm("Deze deal verwijderen?")) {
+        state.deals = state.deals.filter(function (d) { return d.id !== t.dataset.delDeal; });
+        save(); render();
+      }
+    } else if (t.dataset && t.dataset.delCust) {
+      var c = customerById(t.dataset.delCust);
+      var linked = state.deals.filter(function (d) { return d.customerId === t.dataset.delCust; }).length;
+      var msg = linked > 0
+        ? "Deze klant heeft " + linked + " deal(s). Klant én die deals verwijderen?"
+        : "Deze klant verwijderen?";
+      if (confirm(msg)) {
+        state.customers = state.customers.filter(function (x) { return x.id !== t.dataset.delCust; });
+        state.deals = state.deals.filter(function (d) { return d.customerId !== t.dataset.delCust; });
+        save(); render();
+      }
+    }
+  });
+
+  // Export / import (back-up van lokale data)
+  el("exportBtn").addEventListener("click", function () {
+    var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "crm-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+  el("importBtn").addEventListener("click", function () { el("importFile").click(); });
+  el("importFile").addEventListener("change", function (e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var parsed = JSON.parse(reader.result);
+        if (!parsed || !Array.isArray(parsed.customers) || !Array.isArray(parsed.deals)) {
+          throw new Error("Onverwacht formaat");
+        }
+        if (confirm("Dit vervangt je huidige data door de back-up. Doorgaan?")) {
+          state = parsed; save(); render();
+        }
+      } catch (err) {
+        alert("Kon dit bestand niet inlezen: " + err.message);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  });
+
+  // ---- Init ----
+  load();
+  initStatusSelects();
+  render();
+})();
+</script>
+</body>
+</html>
