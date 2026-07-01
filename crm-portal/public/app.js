@@ -31,7 +31,7 @@ const STATUS_COLORS = {
 const AVATAR_COLORS = ["#B8925A", "#8C7A3E", "#A2745A", "#7C8A5A", "#5A7C8A", "#8A5A7C"];
 
 // ---------- state ----------
-let state = { customers: [], quotes: [], stats: null, statuses: [] };
+let state = { customers: [], quotes: [], stats: null, statuses: [], quoteTypes: [] };
 let currentView = "dashboard";
 let currentUser = null;
 
@@ -49,7 +49,7 @@ async function api(method, path, body) {
 }
 async function loadState() {
   const [s, meta] = await Promise.all([api("GET", "/state"), api("GET", "/meta")]);
-  state = { ...s, statuses: meta.statuses };
+  state = { ...s, statuses: meta.statuses, quoteTypes: meta.quoteTypes || ["Nieuw", "Upsell"] };
 }
 // mutaties geven de volledige nieuwe state terug
 function applyState(s) { state = { ...state, ...s }; }
@@ -128,12 +128,39 @@ function renderDashboard() {
       ]),
       h("div", { class: "metrics", style: "margin-top:14px" }, [
         metric("Open offertes", String(s.openCount), eur.format(s.openValue) + " open"),
-        metric("Gesloten offertes", String(s.closedCount), "gewonnen + verloren"),
-        metric("Klanten", String(s.customerCount), s.totalQuotes + (s.totalQuotes === 1 ? " offerte" : " offertes")),
+        metric("Omzet nieuw", eur.format(s.upsell.newBusinessRevenue), "nieuwe klanten"),
+        metric("Omzet upsell", eur.format(s.upsell.upsellRevenue), "uitbreiding bestaand"),
       ]),
+      renderUpsellPanel(s),
       renderStatusPanel(s),
     ])
   );
+}
+
+function renderUpsellPanel(s) {
+  const ops = s.upsell.opportunities;
+  const panel = h("div", { class: "panel" }, [
+    h("h3", { text: "Upsell-kansen" }),
+    h("p", { class: "panel-hint", text: "Warme klanten die eerder tekenden maar nu geen lopend traject hebben — jouw belletjeslijst." }),
+  ]);
+  if (ops.length === 0) {
+    panel.append(h("div", { class: "empty", style: "padding:14px", text: "Geen open kansen. Iedereen met historie heeft een lopend traject." }));
+    return panel;
+  }
+  for (const o of ops.slice(0, 6)) {
+    const cust = state.customers.find((c) => c.id === o.customerId);
+    panel.append(
+      h("button", { class: "upsell-row", onclick: () => cust && openCustomerSheet(cust.id) }, [
+        cust ? avatar(cust) : h("div", { class: "avatar" }),
+        h("div", { class: "upsell-info" }, [
+          h("div", { class: "upsell-name", text: o.name }),
+          h("div", { class: "upsell-sub", text: "eerder gewonnen · laatste: " + (o.lastWonAt ? new Date(o.lastWonAt).toLocaleDateString("nl-NL") : "—") }),
+        ]),
+        h("div", { class: "upsell-val" }, [h("strong", { text: eur.format(o.wonValue) }), h("span", { text: "→ benader" })]),
+      ])
+    );
+  }
+  return panel;
 }
 
 function renderStatusPanel(s) {
@@ -196,7 +223,75 @@ function renderCustomers() {
 function render() {
   document.querySelectorAll(".seg").forEach((b) => b.classList.toggle("active", b.dataset.view === currentView));
   if (currentView === "dashboard") renderDashboard();
+  else if (currentView === "growth") renderGrowth();
   else renderCustomers();
+}
+
+// ---------- grafieken (eigen SVG/CSS, geen library) ----------
+function monthLabel(mo) {
+  const [y, m] = mo.split("-");
+  return ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"][+m - 1] + " '" + y.slice(2);
+}
+
+function columnChart(items, valueOf, fmt) {
+  const max = Math.max(1, ...items.map(valueOf));
+  const bars = h("div", { class: "chart-bars" });
+  for (const it of items) {
+    const v = valueOf(it);
+    const col = h("div", { class: "chart-col" });
+    const bar = h("div", { class: "chart-bar" });
+    bar.style.height = (v / max) * 100 + "%";
+    bar.title = monthLabel(it.month) + ": " + fmt(v);
+    col.append(h("div", { class: "chart-val", text: v > 0 ? fmt(v) : "" }), bar, h("div", { class: "chart-lab", text: monthLabel(it.month) }));
+    bars.append(col);
+  }
+  return h("div", { class: "chart" }, [bars]);
+}
+
+function lineChart(items, valueOf, fmt) {
+  const max = Math.max(1, ...items.map(valueOf));
+  const n = items.length;
+  const W = 100, H = 42, pad = 2;
+  const pts = items.map((it, i) => {
+    const x = n > 1 ? pad + (i / (n - 1)) * (W - 2 * pad) : W / 2;
+    const y = H - pad - (valueOf(it) / max) * (H - 2 * pad);
+    return [x, y];
+  });
+  const path = pts.map((p) => p.join(",")).join(" ");
+  const area = `${pad},${H - pad} ` + path + ` ${W - pad},${H - pad}`;
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.setAttribute("preserveAspectRatio", "none");
+  svg.setAttribute("class", "line-svg");
+  svg.innerHTML =
+    `<polygon points="${area}" fill="rgba(184,146,90,.14)"></polygon>` +
+    `<polyline points="${path}" fill="none" stroke="#B8925A" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"></polyline>`;
+  const labels = h("div", { class: "chart-labels" }, [
+    h("span", { text: monthLabel(items[0].month) }),
+    h("span", { text: fmt(valueOf(items[items.length - 1])) + " nu" }),
+  ]);
+  return h("div", { class: "chart line" }, [svg, labels]);
+}
+
+function renderGrowth() {
+  const content = document.getElementById("content");
+  content.innerHTML = "";
+  const m = state.stats.monthly;
+
+  if (!m || m.every((x) => x.wonRevenue === 0 && x.newQuotes === 0)) {
+    content.append(h("div", { class: "fade-in" }, [
+      h("h2", { class: "view-title", text: "Groei" }),
+      h("div", { class: "empty", text: "Nog te weinig data. Zodra je offertes wint verschijnt hier je groei per maand." }),
+    ]));
+    return;
+  }
+
+  content.append(h("div", { class: "fade-in" }, [
+    h("h2", { class: "view-title", text: "Groei" }),
+    h("div", { class: "panel" }, [h("h3", { text: "Omzet per maand" }), columnChart(m, (x) => x.wonRevenue, (v) => eur.format(v))]),
+    h("div", { class: "panel" }, [h("h3", { text: "Cumulatieve omzet" }), lineChart(m, (x) => x.cumulative, (v) => eur.format(v))]),
+    h("div", { class: "panel" }, [h("h3", { text: "Nieuwe offertes per maand" }), columnChart(m, (x) => x.newQuotes, (v) => String(v))]),
+  ]));
 }
 
 // ---------- sheet (create/edit klant + offertes) ----------
@@ -319,24 +414,36 @@ function renderQuotes(customerId) {
     return list;
   }
   for (const q of quotes) {
+    const doPatch = async (body) => {
+      try { applyState(await api("PATCH", "/quotes/" + q.id, body)); render(); refreshSheet(customerId); }
+      catch (e) { toast(e.message, true); }
+    };
     const valueInput = h("input", { type: "number", min: "0", step: "0.01", value: q.value });
-    valueInput.addEventListener("change", async () => {
-      try { applyState(await api("PATCH", "/quotes/" + q.id, { value: parseFloat(valueInput.value) || 0 })); toast("Bijgewerkt"); render(); refreshSheet(customerId); }
-      catch (e) { toast(e.message, true); }
-    });
+    valueInput.addEventListener("change", () => doPatch({ value: parseFloat(valueInput.value) || 0 }));
+
+    const typeSelect = h("select", { class: "q-type" }, state.quoteTypes.map((t) => h("option", { value: t, ...(t === q.type ? { selected: true } : {}) }, t)));
+    typeSelect.addEventListener("change", () => doPatch({ type: typeSelect.value }));
+
     const statusSelect = h("select", {}, state.statuses.map((st) => h("option", { value: st, ...(st === q.status ? { selected: true } : {}) }, st)));
-    statusSelect.addEventListener("change", async () => {
-      try { applyState(await api("PATCH", "/quotes/" + q.id, { status: statusSelect.value })); toast("Status bijgewerkt"); render(); refreshSheet(customerId); }
-      catch (e) { toast(e.message, true); }
-    });
+    statusSelect.addEventListener("change", () => doPatch({ status: statusSelect.value }));
+
+    // Win-datum alleen bewerkbaar tonen als de offerte gewonnen is.
+    let dateEl = null;
+    if (q.status === "Gewonnen") {
+      dateEl = h("input", { type: "date", class: "q-date", value: q.wonAt ? q.wonAt.slice(0, 10) : "" });
+      dateEl.addEventListener("change", () => doPatch({ wonAt: dateEl.value }));
+    }
+
     const del = h("button", { class: "icon-btn", text: "verwijder", onclick: async () => {
       if (!confirm("Deze offerte verwijderen?")) return;
       try { applyState(await api("DELETE", "/quotes/" + q.id)); toast("Offerte verwijderd"); render(); refreshSheet(customerId); }
       catch (e) { toast(e.message, true); }
     }});
+
+    const tag = q.type === "Upsell" ? h("span", { class: "tag-upsell", text: "Upsell" }) : null;
     list.append(h("div", { class: "quote" }, [
-      h("div", { class: "q-title" }, [q.title || "Offerte", h("small", { text: new Date(q.createdAt).toLocaleDateString("nl-NL") })]),
-      valueInput, statusSelect, del,
+      h("div", { class: "q-title" }, [h("span", {}, [q.title || "Offerte", tag]), h("small", { text: "aangemaakt " + new Date(q.createdAt).toLocaleDateString("nl-NL") })]),
+      typeSelect, valueInput, statusSelect, dateEl, del,
     ]));
   }
   return list;
@@ -345,6 +452,7 @@ function renderQuotes(customerId) {
 function renderAddQuote(customerId) {
   const title = h("input", { placeholder: "Titel (bv. Website redesign)" });
   const value = h("input", { type: "number", min: "0", step: "0.01", placeholder: "Waarde €" });
+  const type = h("select", {}, state.quoteTypes.map((t) => h("option", { value: t }, t)));
   const status = h("select", {}, state.statuses.map((st) => h("option", { value: st }, st)));
   const err = h("div", { class: "field-err" });
   const add = h("button", { class: "btn-ghost", text: "+ Offerte toevoegen", onclick: async () => {
@@ -352,7 +460,7 @@ function renderAddQuote(customerId) {
     const v = parseFloat(value.value);
     if (value.value === "" || !Number.isFinite(v) || v < 0) { err.textContent = "Vul een geldige waarde in."; return; }
     try {
-      applyState(await api("POST", "/quotes", { customerId, title: title.value.trim(), value: v, status: status.value }));
+      applyState(await api("POST", "/quotes", { customerId, title: title.value.trim(), value: v, status: status.value, type: type.value }));
       toast("Offerte toegevoegd");
       render();
       refreshSheet(customerId);
@@ -361,6 +469,7 @@ function renderAddQuote(customerId) {
   return h("div", { style: "margin-top:12px" }, [
     h("div", { class: "row" }, [
       h("div", { class: "field", style: "flex:2" }, [title]),
+      h("div", { class: "field" }, [type]),
       h("div", { class: "field" }, [value]),
       h("div", { class: "field" }, [status]),
     ]),

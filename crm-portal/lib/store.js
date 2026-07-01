@@ -6,12 +6,28 @@ import { dirname } from "node:path";
 
 export const STATUSES = ["Nieuw", "In gesprek", "Voorstel", "Gewonnen", "Verloren"];
 export const OPEN_STATUSES = ["Nieuw", "In gesprek", "Voorstel"];
+export const QUOTE_TYPES = ["Nieuw", "Upsell"];
 
 export class Store {
   constructor(file) {
     this.file = file;
     this.data = { customers: [], quotes: [] };
     this._load();
+    this._migrate();
+  }
+
+  // Vult ontbrekende velden op bestaande offertes (type, wonAt) zodat oude
+  // data blijft werken na een schema-uitbreiding.
+  _migrate() {
+    let changed = false;
+    for (const q of this.data.quotes) {
+      if (q.type === undefined) { q.type = "Nieuw"; changed = true; }
+      if (q.wonAt === undefined) {
+        q.wonAt = q.status === "Gewonnen" ? (q.createdAt || new Date().toISOString()) : null;
+        changed = true;
+      }
+    }
+    if (changed) this._save();
   }
 
   _load() {
@@ -86,12 +102,16 @@ export class Store {
   // ---- Offertes ----
   createQuote(input) {
     const now = new Date().toISOString();
+    const status = input.status;
     const quote = {
       id: randomUUID(),
       customerId: input.customerId,
       title: input.title || "",
       value: input.value,
-      status: input.status,
+      status,
+      type: input.type || "Nieuw",
+      // Win-datum: expliciet meegegeven, anders automatisch bij winst.
+      wonAt: input.wonAt || (status === "Gewonnen" ? now : null),
       createdAt: now,
       updatedAt: now,
     };
@@ -109,7 +129,15 @@ export class Store {
     if (!q) return null;
     if (patch.title !== undefined) q.title = patch.title;
     if (patch.value !== undefined) q.value = patch.value;
-    if (patch.status !== undefined) q.status = patch.status;
+    if (patch.type !== undefined) q.type = patch.type;
+    const explicitWon = patch.wonAt !== undefined;
+    if (explicitWon) q.wonAt = patch.wonAt || null;
+    if (patch.status !== undefined) {
+      q.status = patch.status;
+      // Win-datum automatisch beheren, tenzij expliciet meegegeven.
+      if (patch.status === "Gewonnen") { if (!q.wonAt) q.wonAt = new Date().toISOString(); }
+      else if (!explicitWon) { q.wonAt = null; }
+    }
     q.updatedAt = new Date().toISOString();
     this._save();
     return q;
@@ -154,7 +182,77 @@ export class Store {
       totalQuotes,
       customerCount,
       perStatus,
+      monthly: this._monthly(),
+      upsell: this._upsell(),
     };
+  }
+
+  // Omzet/activiteit per maand — de basis voor de groei-grafieken.
+  _monthly() {
+    const quotes = this.data.quotes;
+    const key = (iso) => (iso ? String(iso).slice(0, 7) : null); // "YYYY-MM"
+
+    // Bereikgrens bepalen: van eerste activiteit t/m huidige maand.
+    const nowKey = key(new Date().toISOString());
+    let minKey = nowKey;
+    for (const q of quotes) {
+      for (const k of [key(q.createdAt), key(q.wonAt)]) {
+        if (k && k < minKey) minKey = k;
+      }
+    }
+
+    // Maandenlijst opbouwen (min..nu), gemaximeerd op de laatste 24.
+    const months = [];
+    let [y, m] = minKey.split("-").map(Number);
+    const [ny, nm] = nowKey.split("-").map(Number);
+    while (y < ny || (y === ny && m <= nm)) {
+      months.push(`${y}-${String(m).padStart(2, "0")}`);
+      m += 1; if (m > 12) { m = 1; y += 1; }
+      if (months.length > 240) break; // veiligheidsrem
+    }
+    const window = months.slice(-24);
+
+    let cumulative = 0;
+    // Cumulatief moet ook de omzet vóór het venster meenemen.
+    const before = window[0];
+    for (const q of quotes) {
+      if (q.status === "Gewonnen" && key(q.wonAt) && key(q.wonAt) < before) cumulative += Number(q.value) || 0;
+    }
+
+    return window.map((mo) => {
+      let wonRevenue = 0, wonCount = 0, newQuotes = 0;
+      for (const q of quotes) {
+        if (key(q.createdAt) === mo) newQuotes += 1;
+        if (q.status === "Gewonnen" && key(q.wonAt) === mo) { wonRevenue += Number(q.value) || 0; wonCount += 1; }
+      }
+      cumulative += wonRevenue;
+      return { month: mo, wonRevenue, wonCount, newQuotes, cumulative };
+    });
+  }
+
+  // Upsell: aandeel omzet uit uitbreiding + warme klanten zonder lopend traject.
+  _upsell() {
+    const quotes = this.data.quotes;
+    let upsellRevenue = 0, newBusinessRevenue = 0;
+    for (const q of quotes) {
+      if (q.status !== "Gewonnen") continue;
+      const v = Number(q.value) || 0;
+      if (q.type === "Upsell") upsellRevenue += v; else newBusinessRevenue += v;
+    }
+
+    const opportunities = [];
+    for (const c of this.data.customers) {
+      const cq = quotes.filter((q) => q.customerId === c.id);
+      const wonValue = cq.filter((q) => q.status === "Gewonnen").reduce((s, q) => s + (Number(q.value) || 0), 0);
+      const openCount = cq.filter((q) => OPEN_STATUSES.includes(q.status)).length;
+      // Warme klant (heeft eerder gewonnen) zonder lopend traject = belletjeslijst.
+      if (wonValue > 0 && openCount === 0) {
+        const wonDates = cq.filter((q) => q.status === "Gewonnen" && q.wonAt).map((q) => q.wonAt).sort();
+        opportunities.push({ customerId: c.id, name: c.name, wonValue, lastWonAt: wonDates[wonDates.length - 1] || null });
+      }
+    }
+    opportunities.sort((a, b) => b.wonValue - a.wonValue);
+    return { upsellRevenue, newBusinessRevenue, opportunities };
   }
 
   fullState() {

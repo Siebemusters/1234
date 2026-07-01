@@ -79,7 +79,7 @@ async function main() {
   check("klant zonder naam -> 400", (await api("POST", "/customers", { name: "" })).status === 400);
   const c1 = await api("POST", "/customers", { name: "De Vries Studio", website: "devries.nl", email: "info@devries.nl" });
   check("klant aanmaken -> 201", c1.status === 201);
-  const custId = c1.body.customers[0].id;
+  const custId = c1.body.customers.find((c) => c.name === "De Vries Studio").id;
 
   await api("POST", "/quotes", { customerId: custId, title: "Website", value: 8000, status: "Gewonnen" });
   await api("POST", "/quotes", { customerId: custId, title: "SEO", value: 2000, status: "Voorstel" });
@@ -90,8 +90,30 @@ async function main() {
   check("open waarde = 3200", s.stats.openValue === 3200);
   check("conversie = 33%", Math.round(s.stats.conversion) === 33);
 
+  // ---- win-datum + maand-data ----
+  const wonQuote = s.quotes.find((q) => q.title === "Website");
+  check("win-datum automatisch gezet bij Gewonnen", !!wonQuote.wonAt);
+  check("maand-data aanwezig", Array.isArray(s.stats.monthly) && s.stats.monthly.length > 0);
+  check("huidige maand bevat gewonnen omzet", s.stats.monthly.some((mo) => mo.wonRevenue === 8000));
+  check("cumulatief veld aanwezig", s.stats.monthly.every((mo) => typeof mo.cumulative === "number"));
+
+  // ---- upsell ----
+  await api("POST", "/quotes", { customerId: custId, title: "Uitbreiding", value: 1500, status: "Gewonnen", type: "Upsell" });
+  const s2 = (await api("GET", "/state")).body;
+  check("upsell-omzet apart geteld", s2.stats.upsell.upsellRevenue === 1500);
+  check("nieuwe-omzet apart geteld", s2.stats.upsell.newBusinessRevenue === 8000);
+  check("fout offertetype -> 400", (await api("POST", "/quotes", { customerId: custId, value: 100, status: "Nieuw", type: "Xyz" })).status === 400);
+
+  // upsell-kans: warme klant zonder lopend traject
+  const c2 = await api("POST", "/customers", { name: "Warme Klant" });
+  const c2id = c2.body.customers.find((c) => c.name === "Warme Klant").id;
+  await api("POST", "/quotes", { customerId: c2id, title: "Deal", value: 5000, status: "Gewonnen" });
+  const s3 = (await api("GET", "/state")).body;
+  check("upsell-kans verschijnt voor warme klant", s3.stats.upsell.opportunities.some((o) => o.customerId === c2id));
+  check("klant met open traject is geen upsell-kans", !s3.stats.upsell.opportunities.some((o) => o.customerId === custId));
+
   const del = await api("DELETE", "/customers/" + custId);
-  check("klant verwijderen cascadeert offertes", del.body.customers.length === 0 && del.body.quotes.length === 0);
+  check("klant verwijderen cascadeert offertes", !del.body.customers.some((c) => c.id === custId) && !del.body.quotes.some((q) => q.customerId === custId));
 
   // ---- logout ----
   await api("POST", "/logout");
@@ -125,6 +147,14 @@ async function main() {
   await page.click(".login-card button[type=submit]");
   await page.waitForSelector(".view-title");
   check("UI: login lukt en dashboard laadt", (await page.textContent(".metrics")).includes("Totale omzet"));
+
+  // Groei-tab toont grafieken
+  await page.click('.seg[data-view=growth]');
+  await page.waitForSelector(".chart");
+  check("UI: Groei-tab toont grafieken", (await page.$$(".chart")).length >= 1);
+  await page.click('.seg[data-view=dashboard]');
+  await page.waitForSelector(".view-title");
+
   check("UI laadt zonder JS-fouten", errors.length === 0);
   if (errors.length) console.log("  ", errors);
 

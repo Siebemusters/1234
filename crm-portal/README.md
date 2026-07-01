@@ -45,9 +45,11 @@ Config via env-vars:
 
 ## Functies
 
-- **Dashboard:** totale omzet, conversie, € per klant, open/gesloten offertes, waarde openstaande offertes, waarde per status.
+- **Dashboard:** totale omzet, conversie, € per klant, open offertes, omzet uit nieuwe klanten vs. upsell, upsell-kansen, en waarde per status.
+- **Groei:** grafieken van omzet per maand, cumulatieve omzet (groeilijn) en nieuwe offertes per maand.
+- **Upsell:** elke offerte is *Nieuw* of *Upsell*; het dashboard splitst de omzet en toont een belletjeslijst van warme klanten (eerder gewonnen, nu geen lopend traject).
 - **Klanten:** toevoegen/bewerken/verwijderen (naam, website, e-mail, telefoon, notities).
-- **Offertes:** meerdere per klant; titel, waarde en status inline bewerkbaar. Klant verwijderen verwijdert diens offertes mee (cascade).
+- **Offertes:** meerdere per klant; titel-type, waarde, status en win-datum inline bewerkbaar. Win-datum wordt automatisch gezet bij winst en is terug te dateren voor historische deals. Klant verwijderen verwijdert diens offertes mee (cascade).
 - **Logo automatisch:** vul de website in → het favicon van het domein verschijnt (128px), met een initialen-avatar als fallback.
 
 ### Echte merklogo's (optioneel)

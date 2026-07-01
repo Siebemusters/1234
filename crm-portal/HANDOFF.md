@@ -11,7 +11,7 @@ Een fullstack CRM-portal met backend die je zelf kunt draaien en waarin je alles
 - `crm-portal/lib/auth.js` — auth: scrypt-hashing, server-side sessies, rate limiting.
 - `crm-portal/create-user.mjs` — CLI om gebruikers te maken/resetten.
 - `crm-portal/public/` — frontend (`index.html`, `styles.css`, `app.js`), vanilla JS, Apple-achtig, met inlogscherm.
-- `crm-portal/test/run.mjs` — integratietest (echte server + auth + headless UI, 28 checks).
+- `crm-portal/test/run.mjs` — integratietest (echte server + auth + headless UI, 36 checks).
 - `README.md`, `.gitignore`.
 
 ## 2b. Beveiliging (wat er in zit)
@@ -38,14 +38,20 @@ Een fullstack CRM-portal met backend die je zelf kunt draaien en waarin je alles
 ## 5. Hoe je het test / draait
 - **Gebruiker maken:** `node create-user.mjs <naam> <wachtwoord>` (min. 10 tekens).
 - **Draaien:** `cd crm-portal && node server.js` → http://localhost:4000 → inloggen.
-- **Testen:** `cd crm-portal && node test/run.mjs` → verwacht "ALLE TESTS GESLAAGD" (28 checks: auth, CSRF, rate-limit, security-headers, CRUD, stats, cascade, path-traversal, UI-login/logout). Deze test ving twee echte bugs tijdens het bouwen: (1) het `hidden`-attribuut werd door `display:flex` overschreven (eerst de modal-overlay, later de nav op het inlogscherm) → globaal gefixt met `[hidden]{display:none!important}`; (2) rate-limit-uitputting van admin blokkeerde de UI-login (testfout, opgelost met wegwerp-username).
+- **Testen:** `cd crm-portal && node test/run.mjs` → verwacht "ALLE TESTS GESLAAGD" (36 checks: auth, CSRF, rate-limit, security-headers, CRUD, stats, win-datum, maand-data, upsell, cascade, path-traversal, UI-login/groei/logout). Deze test ving meerdere echte bugs tijdens het bouwen: (1) het `hidden`-attribuut werd door `display:flex` overschreven (modal-overlay + nav op inlogscherm) → globaal gefixt met `[hidden]{display:none!important}`; (2) rate-limit-uitputting van admin blokkeerde de UI-login (testfout); (3) `customers[0]` pakte de verkeerde klant in de test → op naam ophalen.
+
+## 5b. Groei & upsell (toegevoegd)
+- **Win-datum (`wonAt`)** per offerte: automatisch bij status→Gewonnen, handmatig terug te dateren. Dit is de basis voor eerlijke maandgrafieken. Migratie vult bestaande data (Gewonnen → wonAt = createdAt).
+- **Offertetype** `Nieuw`/`Upsell` → dashboard splitst omzet; `_upsell()` leidt de belletjeslijst af (warme klant, geen open traject).
+- **Maand-data** (`stats.monthly`): omzet/cumulatief/nieuwe offertes per maand, laatste 24 maanden. Grafieken zijn eigen SVG/CSS (geen library).
 
 ## 6. Wat er nog open staat
 - [ ] **HTTPS/hosting** — de belangrijkste stap vóór online gebruik met echte data.
 - [ ] Echte database (SQLite/Postgres) bij een grotere gebruikersgroep.
 - [ ] Wachtwoord wijzigen vanuit de UI (nu alleen via `create-user.mjs`).
 - [ ] Zoeken/filteren/sorteren in de klantenlijst.
-- [ ] Offerte-titel bewerken na aanmaken (nu alleen waarde + status inline).
+- [ ] Offerte-titel bewerken na aanmaken (nu type/waarde/status/win-datum inline).
+- [ ] Opvolg-/herinneringsdatums per klant (bewust nog niet — zie analyse).
 - [ ] Automatische back-up (nu: kopieer de bestanden in `data/`).
 
 ## 7. Voor de volgende stap

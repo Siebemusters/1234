@@ -1,6 +1,6 @@
 // Validatie aan de rand: elke input van buiten wordt hier gecontroleerd
 // vóór hij de store raakt. De frontend "al gevalideerd" telt niet.
-import { STATUSES } from "./store.js";
+import { STATUSES, QUOTE_TYPES } from "./store.js";
 
 export class ValidationError extends Error {
   constructor(message) {
@@ -52,5 +52,16 @@ export function validateQuote(body, { partial = false } = {}) {
     out.status = status;
   }
   if (body.title !== undefined) out.title = str(body.title).slice(0, 300);
+  if (body.type !== undefined) {
+    const type = str(body.type);
+    if (!QUOTE_TYPES.includes(type)) throw new ValidationError("Onbekend offertetype.");
+    out.type = type;
+  }
+  if (body.wonAt !== undefined) {
+    const w = str(body.wonAt);
+    if (w === "") out.wonAt = null;
+    else if (isNaN(Date.parse(w))) throw new ValidationError("Ongeldige win-datum.");
+    else out.wonAt = w;
+  }
   return out;
 }

@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join, normalize, extname } from "node:path";
 
-import { Store, STATUSES } from "./lib/store.js";
+import { Store, STATUSES, QUOTE_TYPES } from "./lib/store.js";
 import { validateCustomer, validateQuote, ValidationError } from "./lib/validate.js";
 import { AuthStore } from "./lib/auth.js";
 
@@ -159,7 +159,7 @@ async function handleApi(req, res, pathname) {
   if (!user) return send(res, 401, { error: "Niet ingelogd." }, secHeaders);
 
   if (req.method === "GET" && resource === "state") return send(res, 200, store.fullState(), secHeaders);
-  if (req.method === "GET" && resource === "meta") return send(res, 200, { statuses: STATUSES }, secHeaders);
+  if (req.method === "GET" && resource === "meta") return send(res, 200, { statuses: STATUSES, quoteTypes: QUOTE_TYPES }, secHeaders);
 
   if (resource === "customers") {
     if (req.method === "POST") { store.createCustomer(validateCustomer(await readBody(req))); return send(res, 201, store.fullState(), secHeaders); }
