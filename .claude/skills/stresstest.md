@@ -27,7 +27,7 @@ VERIFY zonder STRESS TEST levert schijnzekerheid ("werkt op mijn machine"). STRE
 ## Modi
 
 - **Default (diagnose):** je vindt problemen, geeft **per probleem één concreet fix-voorstel** (met aanpak/diff), en wacht op akkoord vóór je iets aanpast. Na een goedgekeurde fix hertest je om te bewijzen dat het echt groen is én dat je niks anders brak.
-- **`--fix` (gelaagde auto-heal):** je fixt triviale zaken zelf en herhaalt tot groen, maar **stopt en vraagt** bij riskante wijzigingen. Zie STAP 3.
+- **`--fix` (gelaagde auto-heal):** je fixt triviale zaken zelf en herhaalt (max 3 rondes), maar **stopt en vraagt** bij riskante wijzigingen en escaleert als je vastloopt. Zie STAP 3.
 
 Herken `--fix` in de input. Zonder die vlag is diagnose de default — pas nooit ongevraagd code aan.
 
@@ -52,6 +52,18 @@ Hardcode nooit een taal of commando. Lees wat het project zelf gebruikt. Zoek in
 1. Geef expliciet weer wat je gedetecteerd hebt: "Ik draai `X` voor tests, `Y` voor lint, `Z` voor build."
 2. Meerdere manifests (monorepo/polyglot)? Detecteer per onderdeel en draai per onderdeel.
 3. **Niets gevonden → STAP 0-fallback:** verzin geen tests in stilte. Stel een minimale set smoke- en randgeval-tests voor die de belofte van de tool afdekt, **vraag akkoord**, en draai ze pas daarna. Zonder testbaarheid is het per definitie NIET KLAAR — ongetest opleveren is precies wat deze skill moet tegenhouden.
+
+---
+
+## STAP 0.5 — Intake (verplicht bij vage context)
+
+Je kunt niet toetsen of iets "doet wat beloofd is" als je de belofte niet kent. "Werkt op mijn machine" is geen keuring. Ontbreekt essentiële context, stel dan EERST maximaal 3 scherpe vragen en keur pas daarna. Sla over als de gebruiker het al gegeven heeft.
+
+- **Belofte & scope** — Wat moet deze tool exact doen, en wat valt er bewust buiten? (dit is de meetlat voor VERIFY)
+- **Doelomgeving** — Waar draait het bij de klant: OS, runtime/versies, echte vs. testdata, externe afhankelijkheden (API's, DB)? Randgevallen die de klant raakt tellen als "realistisch".
+- **No-go's & risico's** — Wat mag absoluut niet gebeuren (data verlies, downtime, lekkende secrets), en waar zit de gebruiker zelf aan te twijfelen?
+
+Zonder deze context keur je tegen een verzonnen belofte — en dan test je het verkeerde. Kies een kant: vraag door of ga uit van een expliciet benoemde aanname, nooit een vaag midden.
 
 ---
 
@@ -95,9 +107,14 @@ Per gevonden probleem:
 4. **Na akkoord: toepassen + hertesten.** Bewijs dat het probleem weg is én dat je niks anders brak (draai de relevante checks opnieuw). Een fix zonder hertest telt niet als opgelost.
 
 ### `--fix` (gelaagde auto-heal)
-- **Auto-fixen + herhalen tot groen** voor triviale, laag-risico zaken: lint/format, ontbrekende imports, duidelijke bugs, ontbrekende null-checks, ontbrekende input-validatie.
+- **Auto-fixen + herhalen** voor triviale, laag-risico zaken: lint/format, ontbrekende imports, duidelijke bugs, ontbrekende null-checks, ontbrekende input-validatie.
 - **Stop en vraag akkoord** bij riskante zaken: logica-/gedragswijziging, tests verwijderen of versoepelen, security-gevoelige code, data/migraties, publieke API/contract-wijzigingen.
 - Rapporteer **elke** aanpassing die je deed, met waarom.
+
+**Loop-limiet & escalatie (verplicht):**
+- **Maximaal 3 heal-rondes** per probleem. Elke ronde = fix → hertest. Groen binnen 3 rondes → door.
+- **Niet groen na 3 rondes → STOP en escaleer**, niet blijven proberen. Rapporteer: wat je probeerde, waarom het faalde, en wat je nu nodig hebt van de gebruiker. Doorstampen levert een geforceerde, slechte fix — precies wat bij de klant breekt.
+- **Onherstelbaar zonder input** (ontbrekende data, dubbelzinnige belofte, ontbrekende toegang) → direct escaleren, niet gokken. Zo'n probleem blijft **open** in het rapport, wat het oordeel op NIET KLAAR houdt.
 
 ### Anti-cheat regels (niet-onderhandelbaar)
 1. **Nooit een test versoepelen, skippen, of assertions verwijderen om groen te forceren.** Als een test faalt, fix de code — niet de test. Moet een test echt aangepast (was hij fout), zeg dat expliciet en vraag akkoord.
@@ -142,8 +159,9 @@ Per gevonden probleem:
 |---|---|---|---|---|
 | 1 | ... | ... | ✅ hersteld / ⏳ wacht op akkoord / ❌ open | ... |
 
-## OORDEEL: [KLAAR VOOR OPLEVERING / NIET KLAAR]
-[2-3 zinnen. Bij NIET KLAAR: exact wat er nog moet gebeuren. Bij KLAAR: wat is gedekt en wat bewust buiten scope bleef.]
+## OORDEEL: [KLAAR VOOR OPLEVERING / NIET KLAAR] — zekerheid: [HARD / VOORLOPIG]
+[2-3 zinnen. Bij NIET KLAAR: exact wat er nog moet gebeuren. Bij KLAAR: wat is gedekt en wat bewust buiten scope bleef.
+Zekerheid HARD alleen als de checks in alle categorieën echt gedraaid en groen waren. VOORLOPIG als iets niet uitgevoerd kon worden (fallback-tests, load alleen beredeneerd, geen toegang) — zeg dan expliciet wat ongetest bleef.]
 
 ## VOLGENDE STAP
 [Één concrete actie. Bij open problemen: welke fix akkoord nodig heeft. Bij KLAAR: opleveren.]
@@ -164,6 +182,11 @@ Deze overrulen elke neiging om "klaar" te zeggen:
 5. **Open 🔴 dat op akkoord wacht → NIET KLAAR** tot het akkoord er is en de hertest groen is.
 
 Alleen als geen enkel kill-criterium geraakt is en alle 🔴 dicht zijn, mag het oordeel **KLAAR VOOR OPLEVERING** zijn. Bij twijfel tussen KLAAR en NIET KLAAR: NIET KLAAR. Daarvoor bestaat deze skill.
+
+### Zekerheidslabel (verplicht)
+Elk oordeel krijgt een zekerheid — schijnzekerheid bij oplevering is de duurste fout die deze skill kan maken:
+- **HARD** — alle categorieën zijn echt uitgevoerd en groen. Hierop mag je opleveren.
+- **VOORLOPIG** — iets kon niet echt gedraaid worden (fallback-tests, load enkel beredeneerd, geen toegang tot de doelomgeving). Een VOORLOPIG oordeel telt **nooit** als een volwaardige KLAAR: benoem wat ongetest bleef en maak dat de VOLGENDE STAP. Geef nooit een HARD KLAAR op onderbuikgevoel.
 
 ---
 
