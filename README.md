@@ -1,18 +1,18 @@
 # Apify Project
 
-## Setup
+## Installatie
 
-1. Copy the example env file and fill in your API key:
+1. Kopieer het voorbeeldbestand en vul je API-sleutel in:
    ```
    cp .env.example .env
    ```
 
-2. Install dependencies:
+2. Installeer de afhankelijkheden:
    ```
    npm install
    ```
 
-3. Run:
+3. Starten:
    ```
    npm start
    ```
