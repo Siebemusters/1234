@@ -33,6 +33,7 @@ const AVATAR_COLORS = ["#B8925A", "#8C7A3E", "#A2745A", "#7C8A5A", "#5A7C8A", "#
 // ---------- state ----------
 let state = { customers: [], quotes: [], stats: null, statuses: [] };
 let currentView = "dashboard";
+let currentUser = null;
 
 // ---------- API ----------
 async function api(method, path, body) {
@@ -42,6 +43,7 @@ async function api(method, path, body) {
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await res.json().catch(() => ({}));
+  if (res.status === 401) { onLoggedOut(); throw new Error(data.error || "Niet ingelogd."); }
   if (!res.ok) throw new Error(data.error || "Serverfout");
   return data;
 }
@@ -376,6 +378,57 @@ function debounce(fn, ms) {
   return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
 }
 
+// ---------- auth ----------
+function setChrome(loggedIn) {
+  document.getElementById("segmented").hidden = !loggedIn;
+  document.getElementById("newCustomerBtn").hidden = !loggedIn;
+  document.getElementById("logoutBtn").hidden = !loggedIn;
+}
+
+function onLoggedOut() {
+  currentUser = null;
+  setChrome(false);
+  closeSheet();
+  renderLogin();
+}
+
+function renderLogin(errMsg) {
+  const content = document.getElementById("content");
+  content.innerHTML = "";
+  const err = h("div", { class: "field-err", text: errMsg || "" });
+  const userInput = h("input", { id: "l-user", placeholder: "Gebruikersnaam", autocomplete: "username" });
+  const passInput = h("input", { id: "l-pass", type: "password", placeholder: "Wachtwoord", autocomplete: "current-password" });
+
+  async function submit(e) {
+    e.preventDefault();
+    err.textContent = "";
+    const btn = form.querySelector("button");
+    btn.disabled = true; btn.textContent = "Bezig…";
+    try {
+      const { user } = await api("POST", "/login", { username: userInput.value, password: passInput.value });
+      currentUser = user;
+      setChrome(true);
+      await loadState();
+      currentView = "dashboard";
+      render();
+    } catch (e2) {
+      renderLogin(e2.message);
+    }
+  }
+
+  const form = h("form", { class: "login-card", onsubmit: submit }, [
+    h("div", { class: "brand-mark", style: "width:40px;height:40px;border-radius:12px;margin:0 auto 14px" }),
+    h("h2", { class: "login-title", text: "Inloggen" }),
+    h("p", { class: "login-sub", text: "CRM Portal" }),
+    h("div", { class: "field" }, [h("label", { for: "l-user", text: "Gebruikersnaam" }), userInput]),
+    h("div", { class: "field" }, [h("label", { for: "l-pass", text: "Wachtwoord" }), passInput]),
+    err,
+    h("button", { class: "btn-primary", type: "submit", style: "width:100%;padding:12px", text: "Inloggen" }),
+  ]);
+  content.append(h("div", { class: "login-wrap fade-in" }, [form]));
+  setTimeout(() => userInput.focus(), 50);
+}
+
 // ---------- init ----------
 function bindChrome() {
   document.getElementById("segmented").addEventListener("click", (e) => {
@@ -385,6 +438,10 @@ function bindChrome() {
     render();
   });
   document.getElementById("newCustomerBtn").addEventListener("click", () => openCustomerSheet(null));
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    try { await api("POST", "/logout"); } catch {}
+    onLoggedOut();
+  });
   document.getElementById("scrim").addEventListener("click", (e) => { if (e.target.id === "scrim") closeSheet(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheet(); });
 }
@@ -392,12 +449,21 @@ function bindChrome() {
 async function init() {
   bindChrome();
   try {
-    await loadState();
-    render();
+    const res = await fetch("/api/session");
+    const user = res.ok ? (await res.json()).user : null;
+    if (user) {
+      currentUser = user;
+      setChrome(true);
+      await loadState();
+      render();
+    } else {
+      setChrome(false);
+      renderLogin();
+    }
   } catch (e) {
     document.getElementById("content").innerHTML = "";
     document.getElementById("content").append(
-      h("div", { class: "empty" }, [h("p", { text: "Kon data niet laden: " + e.message }), h("button", { class: "btn-ghost", text: "Opnieuw", onclick: init })])
+      h("div", { class: "empty" }, [h("p", { text: "Kon niet verbinden: " + e.message }), h("button", { class: "btn-ghost", text: "Opnieuw", onclick: init })])
     );
   }
 }
