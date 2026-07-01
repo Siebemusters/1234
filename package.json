@@ -1,0 +1,13 @@
+{
+  "name": "apify-project",
+  "version": "1.0.0",
+  "description": "Apify integration project",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "apify-client": "^2.9.4",
+    "dotenv": "^16.4.5"
+  }
+}
