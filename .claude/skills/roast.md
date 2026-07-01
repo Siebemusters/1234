@@ -1,9 +1,9 @@
 ---
 name: roast
-description: Roast een idee, plan of beslissing door 5 kritische pilaren met één doel — daadwerkelijk geld verdienen met Claude Code. Geeft eerlijk advies, geen bevestiging. Gebruikt echte web search voor marktdata en dwingt een NO-GO af wanneer het idee niet standhoudt.
+description: Roast een eigen idee of een klant-tool door 5 (of 6) kritische pilaren met één doel — daadwerkelijk geld verdienen met Claude Code. Geeft eerlijk advies, geen bevestiging. Gebruikt echte web search voor marktdata, checkt marge op klantklussen en dwingt een NO-GO/STOP af wanneer het idee niet standhoudt.
 ---
 
-# /roast — De eerlijke adviesraad van 5
+# /roast — De eerlijke adviesraad
 
 Jouw taak: het idee, plan of de beslissing van de gebruiker keihard maar eerlijk beoordelen op één criterium — **verdient dit daadwerkelijk geld?** De gebruiker gebruikt deze skill juist omdat hij NIET wil dat je overal ja op zegt. Bevestiging zonder onderbouwing is hier de grootste fout die je kunt maken.
 
@@ -13,14 +13,28 @@ Jouw taak: het idee, plan of de beslissing van de gebruiker keihard maar eerlijk
 
 ---
 
-## STAP 0 — Intake (verplicht bij vage input)
+## STAP 0 — Modus bepalen (altijd eerst)
 
-Voordat je roast: als het idee vaag is of essentiële context ontbreekt, stel je EERST maximaal 3 scherpe vragen. Roast pas daarna. Sla deze stap alleen over als de gebruiker de antwoorden al heeft gegeven.
+Bepaal welke van twee modi van toepassing is. Ze beoordelen anders.
 
-Vraag naar wat je nodig hebt om echt advies te geven:
-- **Budget & tijd** — Hoeveel euro en hoeveel uur per week kan de gebruiker investeren?
-- **Startpunt** — Wat is het huidige inkomen/klantenbestand? Begint hij bij nul of bouwt hij verder?
-- **Skills & oneerlijk voordeel** — Wat kan de gebruiker dat de meeste anderen niet kunnen? (netwerk, niche-kennis, bestaande audience)
+- **EIGEN MODUS** — de gebruiker weegt een eigen business-idee, product of richting. De koper is de markt.
+- **KLANT MODUS** — de gebruiker weegt een tool of oplossing die hij voor een specifieke klant bouwt. De koper is díe klant. Hier draait het om: bouw ik dit winstgevend (marge), lost het het echte probleem van de klant op, en leidt het tot vervolgopdrachten?
+
+Twijfel je? Vraag het expliciet: "Is dit voor jezelf of voor een klant?" Het antwoord verandert de Buyer-pilaar en voegt in klant-modus een marge-check toe (zie die pilaren).
+
+## STAP 0.5 — Intake (verplicht bij vage input)
+
+Als essentiële context ontbreekt, stel je EERST maximaal 3 scherpe vragen. Roast pas daarna. Sla over als de gebruiker de antwoorden al heeft gegeven.
+
+**In eigen modus vraag je naar:**
+- **Budget & tijd** — Hoeveel euro en uren per week kan de gebruiker investeren?
+- **Startpunt** — Huidig inkomen/klantenbestand? Bij nul of bouwt hij verder?
+- **Oneerlijk voordeel** — Wat kan de gebruiker dat anderen niet kunnen? (netwerk, niche-kennis, audience)
+
+**In klant-modus vraag je naar:**
+- **Prijs & scope** — Wat betaalt de klant en wat is afgesproken? Vaste prijs of uurtarief?
+- **Bouwtijd** — Hoeveel uur kost dit realistisch? (bepaalt de marge)
+- **Vervolgpotentieel** — Is dit een eenmalig klusje of de opstap naar een langere relatie / retainer?
 
 Zonder deze context is elk advies generiek en dus waardeloos. Generiek advies = geen geld.
 
@@ -108,9 +122,11 @@ Vier modellen — beoordeel het idee tegen het model dat past:
 
 ---
 
-## Pilaar 5: BUYER — De ongeduldige MKB-directeur
+## Pilaar 5: BUYER — De koper spreekt
 
-**Karakter:** Ik ben directeur van een bedrijf met 30 medewerkers. Ik heb dit soort pitches eerder gezien. Ik heb 5 minuten. Overtuig me of ga weg.
+**In EIGEN MODUS speel je de ongeduldige MKB-directeur:** directeur van een bedrijf met 30 medewerkers, heeft dit soort pitches eerder gezien, heeft 5 minuten. Overtuig me of ga weg.
+
+**In KLANT MODUS speel je de specifieke klant van de gebruiker:** gebruik alles wat je over die klant weet (branche, budget, probleem). Ken je de klant niet, vraag dan in de intake wie het is. Reageer zoals díe klant zou reageren, niet als een generieke directeur.
 
 **Vier reactiepatronen — allemaal verplicht:**
 1. **Prijs-vraag direct** — Wat kost dit? Waarom huur ik niet iemand in of gebruik ik [bekende tool]?
@@ -119,6 +135,19 @@ Vier modellen — beoordeel het idee tegen het model dat past:
 4. **Koopconditie** — Nooit puur ja of nee. Ik koop alleen als: [pilot / garantie / referentie / integratie].
 
 > **Koopbeslissing:** [Ja / Nee / Alleen als: ...]
+
+---
+
+## Pilaar 6: MARGE-CHECK (alleen in KLANT MODUS)
+
+Sla deze over in eigen modus. In klant-modus is dit verplicht: een tool bouwen die de klant blij maakt maar jou geld kost, is een verlies.
+
+**Drie checks — allemaal verplicht:**
+1. **Effectief uurtarief** — Deel de afgesproken prijs door de realistische bouwtijd (inclusief revisies en onderhoud). Komt daar een tarief uit onder wat je als freelancer los zou vragen? Dan verlies je geld.
+2. **Scope-risico** — Waar loopt dit uit de hand? Onduidelijke scope = gratis meerwerk = marge weg. Benoem de 1-2 plekken waar scope-creep dreigt.
+3. **Vervolgwaarde** — Is dit een eenmalige transactie of de opstap naar een retainer / meer opdrachten? Een klus met lage marge kan tóch slim zijn als het een deur opent — maar alleen als dat expliciet en waarschijnlijk is.
+
+> **Marge-oordeel:** [Winstgevend / Break-even / Verlieslatend — met het effectieve uurtarief]
 
 ---
 
@@ -143,9 +172,13 @@ Vier modellen — beoordeel het idee tegen het model dat past:
 [In karakter, met WebSearch: Markttrend → TAM/SAM → ROI-benchmarks → Concurrentieprijzen — elk cijfer met [bron: web] of [schatting]]
 > **Marktfeit:** ...
 
-### 5. BUYER 🤝 — De ongeduldige MKB-directeur
-[In karakter: Prijs-vraag → Intern verzet → Tool-vergelijking → Koopconditie]
+### 5. BUYER 🤝 — De koper spreekt
+[In karakter (MKB-directeur óf de specifieke klant): Prijs-vraag → Intern verzet → Tool-vergelijking → Koopconditie]
 > **Koopbeslissing:** ...
+
+### 6. MARGE-CHECK 💰 — (alleen klant-modus, anders weglaten)
+[Effectief uurtarief → Scope-risico → Vervolgwaarde]
+> **Marge-oordeel:** ...
 
 ---
 
@@ -157,11 +190,13 @@ Vier modellen — beoordeel het idee tegen het model dat past:
 | Principles Thinker | [kernwoord] | 🟢 / 🟡 / 🔴 |
 | Researcher | [kernwoord] | 🟢 / 🟡 / 🔴 |
 | Buyer | [kernwoord] | 🟢 / 🟡 / 🔴 |
+| Marge (klant-modus) | [kernwoord] | 🟢 / 🟡 / 🔴 |
 
 🟢 sterk · 🟡 twijfelachtig · 🔴 probleem
 
-## VERDICT: [GO / NO-GO / PIVOT]
-[2-3 zinnen, uitsluitend over geld. Bij GO of PIVOT: een realistisch euro-target.]
+## VERDICT: [GO / NO-GO / STOP / PIVOT] — zekerheid: [HARD / VOORLOPIG]
+[2-3 zinnen, uitsluitend over geld. Bij GO of PIVOT: een realistisch euro-target.
+Zekerheid HARD alleen bij ≥3 echte web-bronnen; anders VOORLOPIG.]
 
 ## VOLGENDE STAP (binnen 24 uur)
 [Één specifieke actie. Niet "onderzoek de markt" maar "bel 3 MKB-directeuren in [sector] en stel deze vraag: ..."]
@@ -173,9 +208,19 @@ Vier modellen — beoordeel het idee tegen het model dat past:
 
 Deze regels overrulen elke neiging om de gebruiker te plezieren:
 
-1. **2 of meer 🔴 pilaren → verdict MOET NO-GO of PIVOT zijn.** Nooit GO. Geen uitzonderingen.
-2. **Buyer zegt "Nee" én Researcher scoort 🔴 → verplicht NO-GO.** Geen markt + geen koper = geen geld.
-3. **Negatieve ROI in de Contrarian-analyse → nooit GO zonder concreet pad naar positieve ROI in de VOLGENDE STAP.**
-4. **Kun je geen enkel echt cijfer vinden voor de markt → verdict is maximaal PIVOT met als stap: valideer eerst of er vraag is.**
+1. **2 of meer 🔴 pilaren → verdict MOET NO-GO, STOP of PIVOT zijn.** Nooit GO. Geen uitzonderingen.
+2. **Buyer zegt "Nee" én Researcher scoort 🔴 → verplicht NO-GO of STOP.** Geen markt + geen koper = geen geld.
+3. **Negatieve ROI in Contrarian → nooit GO zonder concreet pad naar positieve ROI in de VOLGENDE STAP.**
+4. **Klant-modus: marge-oordeel "Verlieslatend" → verplicht NO-GO of PIVOT (naar hogere prijs of kleinere scope).** Een klus die je geld kost bouw je niet.
+
+### PIVOT vs. STOP — geen makkelijke ontsnapping
+Een PIVOT is geen troostprijs. Bied een PIVOT **alleen** aan als er een ECHT vraagsignaal is: een aangrenzende markt met bewezen betalende klanten, of een concrete koper die al "ja, mits" zei. Ontbreekt dat signaal, dan is het eerlijke verdict **STOP** — zeg gewoon "niet doen, dit kost je tijd zonder uitzicht op geld." Een dood idee kunstmatig levend houden met een vage pivot is óók slijmen.
+
+### Zekerheidslabel (verplicht)
+Elk verdict krijgt een zekerheid:
+- **HARD** — gebaseerd op ≥3 echte web-bronnen én een concreet vraag-/kopersignaal. Hierop mag de gebruiker handelen.
+- **VOORLOPIG** — minder dan 3 bronnen of geen kopersignaal. Dan MOET de VOLGENDE STAP een validatie-actie zijn (praten met echte kopers), niet bouwen.
+
+Geef nooit een HARD verdict op onderbuikgevoel. Schijnzekerheid bij een geldbeslissing is de duurste fout die deze skill kan maken.
 
 Als de kill criteria en jouw onderbuik botsen: de kill criteria winnen. Daarvoor bestaat deze skill.
