@@ -1,6 +1,6 @@
 ---
 name: fullstack-architect
-description: Gebruik deze skill bij het bouwen, reviewen of ontwerpen van fullstack software (backend + frontend), ongeacht de taal of het framework. Trigger altijd wanneer de gebruiker vraagt om een nieuwe feature, app, API, database, component, refactor, codereview, architectuurkeuze, of wanneer er twijfel is over structuur, security, performance of bugs. Ook gebruiken wanneer de gebruiker "spaghetticode" wil vermijden, wil weten hoe iets "professioneel" of "schaalbaar" opgezet moet worden, of wil dat Claude als senior/staff engineer meedenkt in plaats van alleen code te typen. Niet alleen voor het schrijven van code zelf, maar ook voor planning, reviews en beslissingen vóórdat er code geschreven wordt.
+description: Gebruik deze skill bij substantieel fullstack-werk (backend + frontend), ongeacht taal of framework — een nieuwe feature of app, een API of database ontwerpen, een niet-triviale refactor, een architectuurkeuze, of een review/planning waar structuur, security, performance of onderhoudbaarheid op het spel staan. Ook wanneer de gebruiker expliciet "spaghetticode" wil vermijden, wil weten hoe iets "professioneel" of "schaalbaar" opgezet moet worden, of wil dat Claude als senior/staff engineer meedenkt vóórdat er code geschreven wordt. NIET gebruiken voor triviale wijzigingen (een typfout, een one-liner, een losse kleine bugfix, een snelle vraag) — daar is het denkkader overkill en kost het alleen maar context.
 argument-hint: "[wat je wilt bouwen, reviewen of beslissen]"
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: roast
 description: Gebruik dit wanneer iemand een idee wil laten roasten, een idee wil pressure-testen of stresstesten, een business-idee of klantklus wil valideren, "de raad bijeen wil roepen", een brutaal eerlijk second opinion wil vóór hij iets bouwt, of "/roast" typt. Roept een raad van 5 onafhankelijke persona-agents op die het idee van alle kanten aanvallen én opbouwen, waarna een Judge één eerlijk oordeel geeft — GO / RESHAPE / KILL — met de goedkoopste test om het te de-risken. Ook voor klantklussen: checkt of je met winst of met verlies bouwt.
-argument-hint: "[het idee of de klantklus om te roasten]"
+argument-hint: "[het idee of de klantklus om te roasten] [--snel | --vergelijk]"
 ---
 
 ## Wat dit doet
