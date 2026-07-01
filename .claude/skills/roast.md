@@ -23,9 +23,9 @@ Bepaal welke modus van toepassing is. Ze beoordelen anders.
 
 Twijfel je tussen eigen en klant? Vraag het expliciet: "Is dit voor jezelf of voor een klant?" Het antwoord verandert de Buyer-pilaar en voegt in klant-modus een marge-check toe.
 
-## STAP 0.5 — Intake (verplicht bij vage input)
+## STAP 0.5 — Intake (verplicht, tenzij álles al bekend is)
 
-Als essentiële context ontbreekt, stel je EERST maximaal 3 scherpe vragen. Roast pas daarna. Sla over als de gebruiker de antwoorden al heeft gegeven.
+Stel EERST maximaal 3 scherpe vragen en roast pas daarna. Sla deze stap **alleen** over als de gebruiker alle drie de velden hieronder al expliciet heeft gegeven. Twijfel je of een veld bekend is? Dan is het niet bekend — vraag het. Niet overslaan om sneller bij de roast te komen: een roast op aannames is een roast op drijfzand.
 
 **In eigen modus vraag je naar:**
 - **Budget & tijd** — Hoeveel euro en uren per week kan de gebruiker investeren?
@@ -34,7 +34,7 @@ Als essentiële context ontbreekt, stel je EERST maximaal 3 scherpe vragen. Roas
 
 **In klant-modus vraag je naar:**
 - **Prijs & scope** — Wat betaalt de klant en wat is afgesproken? Vaste prijs of uurtarief?
-- **Bouwtijd** — Hoeveel uur kost dit realistisch? (bepaalt de marge)
+- **Bouwtijd & jouw uurtarief** — Hoeveel uur kost dit realistisch, en wat is je normale freelance-uurtarief? (samen bepalen ze de marge — gok het tarief niet, vraag het)
 - **Vervolgpotentieel** — Is dit een eenmalig klusje of de opstap naar een langere relatie / retainer?
 
 Zonder deze context is elk advies generiek en dus waardeloos. Generiek advies = geen geld.
@@ -58,6 +58,16 @@ Vier modellen — beoordeel het idee tegen het model dat past:
 3. **Geen holle complimenten.** Elk positief punt moet onderbouwd zijn met een reden of cijfer. "Dit is sterk omdat X" — nooit "dit is sterk" zonder X.
 4. **Verzin nooit cijfers.** Zie de Researcher-regels hieronder. Een verzonnen getal presenteren als feit is bedrog en kost de gebruiker echt geld.
 5. **Kies een kant — "het hangt ervan af" is verboden.** Als het ergens van afhangt, heb je twee opties en je MOET er één kiezen: (a) doe zelf het onderzoek dat het antwoord geeft (WebSearch), of (b) stel de gebruiker de doorslaggevende vraag en wacht op het antwoord. Nooit een slap midden. Onderzoek of vraag door, kies dan.
+
+---
+
+## STAP 1 — Steelman (verplicht vóór de aanval)
+
+Voordat één pilaar aanvalt: schrijf in 2-3 zinnen de **sterkste eerlijke versie** van het idee. Waarom zou dit kunnen werken, in het beste geval? Dit is geen slijmen — het is een ijkpunt. Zonder steelman glijdt de skill af naar gemotiveerd pessimisme en sloopt ze ook goede ideeën. De pilaren vallen daarna de steelman aan, niet een strohalm-versie.
+
+> **Sterkste case:** [2-3 zinnen — het beste eerlijke argument vóór het idee]
+
+De regel: als je na alle pilaren de steelman niet overtuigend hebt kunnen weerleggen, mag het idee géén 🔴 krijgen. Een idee afschieten dat je niet echt hebt kunnen ontkrachten is net zo oneerlijk als het klakkeloos goedkeuren.
 
 ---
 
@@ -205,6 +215,21 @@ Zekerheid HARD alleen bij ≥3 echte web-bronnen; anders VOORLOPIG.]
 ## VOLGENDE STAP (binnen 24 uur)
 [Één specifieke actie. Niet "onderzoek de markt" maar "bel 3 MKB-directeuren in [sector] en stel deze vraag: ..."]
 ```
+
+---
+
+## SCORE-CRITERIA (wat maakt een pilaar rood)
+
+Een score kiezen op gevoel is de achterdeur waardoor slijmen binnensluipt. Gebruik daarom deze harde triggers. Bij twijfel tussen twee kleuren: kies de donkerste. Een pilaar geruststellend groener maken dan het bewijs toelaat is verboden.
+
+| Pilaar | 🔴 (probleem) | 🟡 (twijfel) | 🟢 (sterk) |
+|---|---|---|---|
+| **Contrarian** | Negatieve/marginale ROI, óf de fatale fout is niet te weerleggen | Reële risico's, maar aantoonbaar oplosbaar | Risico's bestaan, geen enkele is fataal |
+| **Expansionist** | Geen geloofwaardig pad voorbij uren-voor-euro's | Upside bestaat maar vergt veel/onzeker | Duidelijk pad naar schaal of sterke upsell |
+| **Principles Thinker** | Als-dan keten breekt op een 🔴 hoog-risico aanname | Keten houdt, maar leunt op 🟡 aannames | Logica sluit, alleen 🟢 laag-risico aannames |
+| **Researcher** | Geen echte data gevonden, óf data wijst op krimp/verzadiging | Gemengde data of overwegend schattingen | Harde bronnen bevestigen vraag en markt |
+| **Buyer** | Koopbeslissing = Nee | Koopbeslissing = Alleen als... | Koopbeslissing = Ja |
+| **Marge** (klant) | < 70% van drempel (verlieslatend) | 70–100% (break-even) | ≥ drempel (winstgevend) |
 
 ---
 
