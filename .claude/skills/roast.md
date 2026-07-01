@@ -15,12 +15,13 @@ Jouw taak: het idee, plan of de beslissing van de gebruiker keihard maar eerlijk
 
 ## STAP 0 — Modus bepalen (altijd eerst)
 
-Bepaal welke van twee modi van toepassing is. Ze beoordelen anders.
+Bepaal welke modus van toepassing is. Ze beoordelen anders.
 
 - **EIGEN MODUS** — de gebruiker weegt een eigen business-idee, product of richting. De koper is de markt.
 - **KLANT MODUS** — de gebruiker weegt een tool of oplossing die hij voor een specifieke klant bouwt. De koper is díe klant. Hier draait het om: bouw ik dit winstgevend (marge), lost het het echte probleem van de klant op, en leidt het tot vervolgopdrachten?
+- **VERGELIJK MODUS** — de gebruiker legt **meerdere opties tegelijk** voor (meerdere ideeën, of meerdere klantaanvragen) en moet kiezen welke het meeste oplevert. Herken dit aan `--vergelijk`, of aan een input met 2+ opties. Zie de aparte vergelijk-flow onderaan.
 
-Twijfel je? Vraag het expliciet: "Is dit voor jezelf of voor een klant?" Het antwoord verandert de Buyer-pilaar en voegt in klant-modus een marge-check toe (zie die pilaren).
+Twijfel je tussen eigen en klant? Vraag het expliciet: "Is dit voor jezelf of voor een klant?" Het antwoord verandert de Buyer-pilaar en voegt in klant-modus een marge-check toe.
 
 ## STAP 0.5 — Intake (verplicht bij vage input)
 
@@ -143,11 +144,14 @@ Vier modellen — beoordeel het idee tegen het model dat past:
 Sla deze over in eigen modus. In klant-modus is dit verplicht: een tool bouwen die de klant blij maakt maar jou geld kost, is een verlies.
 
 **Drie checks — allemaal verplicht:**
-1. **Effectief uurtarief** — Deel de afgesproken prijs door de realistische bouwtijd (inclusief revisies en onderhoud). Komt daar een tarief uit onder wat je als freelancer los zou vragen? Dan verlies je geld.
-2. **Scope-risico** — Waar loopt dit uit de hand? Onduidelijke scope = gratis meerwerk = marge weg. Benoem de 1-2 plekken waar scope-creep dreigt.
-3. **Vervolgwaarde** — Is dit een eenmalige transactie of de opstap naar een retainer / meer opdrachten? Een klus met lage marge kan tóch slim zijn als het een deur opent — maar alleen als dat expliciet en waarschijnlijk is.
+1. **Effectief uurtarief tegen een harde drempel** — Deel de afgesproken prijs door de realistische bouwtijd (inclusief revisies en onderhoud). Vergelijk met de **drempel = het normale freelance-uurtarief van de gebruiker** (vraag dit in de intake als je het niet weet; anker bij €90/uur als er echt geen getal is). Regels:
+   - Effectief tarief **< 70% van de drempel** → 🔴 Verlieslatend. Dit is een verliesval, ongeacht hoe leuk de klus is.
+   - **70–100% van de drempel** → 🟡 Break-even. Alleen doen als de vervolgwaarde (check 3) hard is.
+   - **≥ de drempel** → 🟢 Winstgevend.
+2. **Scope-risico** — Waar loopt dit uit de hand? Onduidelijke scope = gratis meerwerk = marge weg. Benoem de 1-2 plekken waar scope-creep dreigt, en hoeveel uur elk je marge kost.
+3. **Vervolgwaarde** — Eenmalig klusje of opstap naar retainer / meer opdrachten? Een lage-marge klus mag alleen door als de vervolgwaarde **concreet en waarschijnlijk** is (de klant heeft het uitgesproken of er is een duidelijk pad). Een vaag "misschien meer werk" telt niet.
 
-> **Marge-oordeel:** [Winstgevend / Break-even / Verlieslatend — met het effectieve uurtarief]
+> **Marge-oordeel:** [🟢 Winstgevend / 🟡 Break-even / 🔴 Verlieslatend — met het effectieve uurtarief in € én het % van de drempel]
 
 ---
 
@@ -224,3 +228,43 @@ Elk verdict krijgt een zekerheid:
 Geef nooit een HARD verdict op onderbuikgevoel. Schijnzekerheid bij een geldbeslissing is de duurste fout die deze skill kan maken.
 
 Als de kill criteria en jouw onderbuik botsen: de kill criteria winnen. Daarvoor bestaat deze skill.
+
+---
+
+## VERGELIJK MODUS (meerdere opties naast elkaar)
+
+Gebruik dit wanneer de gebruiker 2+ opties tegelijk voorlegt (ideeën of klantaanvragen) en moet kiezen wat het meeste oplevert. Doel: niet elk idee volledig roasten, maar snel bepalen **welke optie je eerst pakt omdat die het meeste geld per uur oplevert.**
+
+**Werkwijze:**
+1. **Snelle roast per optie** — draai per optie een verkorte roast: Contrarian (1 grootste risico), Researcher (1 echt marktcijfer via WebSearch), Buyer (koopt/koopt niet). Niet de volle 5-6 pilaren.
+2. **Scoor elke optie op vier assen** (elk 1-5):
+   - **€/uur potentieel** — verwachte opbrengst gedeeld door benodigde uren
+   - **Snelheid tot eerste euro** — hoe snel levert het cash op
+   - **Bewijs van vraag** — is er een concrete koper of marktsignaal? (harde bronnen)
+   - **Vervolgwaarde** — leidt het tot herhaalomzet / retainer / schaal
+3. **Rangschik** en beveel er expliciet één aan om als eerste te doen.
+
+**Output:**
+```
+## 🔥 /roast --vergelijk — [X opties]
+
+### Snelle roast per optie
+**Optie A: [naam]** — grootste risico · marktcijfer [bron] · koper ja/nee
+**Optie B: [naam]** — ...
+**Optie C: [naam]** — ...
+
+## RANGLIJST
+| Optie | €/uur | Snelheid | Vraagbewijs | Vervolg | Totaal |
+|---|---|---|---|---|---|
+| A | 4 | 3 | 5 | 2 | 14 |
+| B | 2 | 5 | 3 | 4 | 14 |
+| C | 5 | 2 | 1 | 3 | 11 |
+
+## WINNAAR: [optie] — zekerheid: [HARD / VOORLOPIG]
+[Waarom deze eerst. Als twee gelijk eindigen: kies op vraagbewijs — echte kopers verslaan potentieel.]
+
+## VOLGENDE STAP (binnen 24 uur)
+[Één actie voor de winnaar. De rest parkeer je expliciet — niet tegelijk aanpakken, dat verdunt je uren.]
+```
+
+**Regel:** bij gelijke totaalscores wint de optie met het hoogste **Vraagbewijs**. Een bewezen koper is meer waard dan een groter potentieel op papier. En: beveel altijd aan om er één tegelijk te doen — parallel werken aan alles is de snelste weg naar niks afmaken.
